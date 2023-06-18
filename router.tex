@@ -1,0 +1,13 @@
+\cgiContentType{text/html}
+\cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>}
+\cgiBodyX{<p>Current path: \cgiPathInfo}
+
+\cgiIfPath{admin}{
+	\cgiPopPath{
+		\cgiBody{<p>You are inside the admin directory!}
+		\cgiBodyX{<p>Current path: \cgiPathInfo}
+	}
+	\cgiEnd
+}
+
+\cgiBody{<p>You are a normal user…, boring.}

@@ -1,0 +1,105 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cgi}
+
+\ExplSyntaxOn
+
+\cs_new:Npn \g_cgi_env:Nn #1 #2 {
+	\sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } { } \l_tmpa_tl
+	\tl_trim_spaces:N \l_tmpa_tl
+	\str_const:Nx #1 {\tl_tail:N \l_tmpa_tl}
+}
+
+\g_cgi_env:Nn \c_cgi_path_info_str {PATH_INFO}
+\seq_new:N \g_cgi_path_info_seq
+
+\cs_generate_variant:Nn \regex_split:nnN {nxN}
+\regex_split:nxN {/} {\str_use:N \c_cgi_path_info_str} \g_cgi_path_info_seq
+
+\prg_new_conditional:Npnn \cgi_if_path:n #1 { TF, T, F } {
+	\seq_get_left:NN \g_cgi_path_info_seq \l_tmpa_tl
+	\str_set:Nx \l_tmpa_str {\tl_to_str:N \l_tmpa_tl}
+	\str_set:Nx \l_tmpb_str {#1}
+
+	\str_if_eq:NNTF \l_tmpa_str \l_tmpb_str {
+		\prg_return_true:
+	} {
+		\prg_return_false:
+	}
+}
+
+\cs_new:Npn \cgi_pop_path:n #1 {
+	{
+		\seq_pop_left:NN \g_cgi_path_info_seq \l_tmpa_tl
+		#1
+	}
+}
+
+\iow_new:N \g_cgi_header_iow
+\iow_open:Nn \g_cgi_header_iow {\c_sys_jobname_str.cgi-header}
+
+\seq_new:N \g_cgi_headers_seq
+
+\cs_new:Npn \cgi_header:nn #1 #2 {
+	\str_if_exist:cF {g__cgi_header__#1_str} {
+		\str_new:c {g__cgi_header__#1_str}
+		\seq_push:Nn \g_cgi_headers_seq {#1}
+	}
+
+	\str_set:cn {g__cgi_header__#1_str} {#2}
+}
+
+\cs_generate_variant:Nn \cgi_header:nn {nx}
+\cs_generate_variant:Nn \cgi_header:nn {xn}
+\cs_generate_variant:Nn \cgi_header:nn {xx}
+
+\cs_new:Nn \cgi_header_write: {
+	\seq_map_inline:Nn \g_cgi_headers_seq {
+		\iow_now:Nx \g_cgi_header_iow {##1:~\str_use:c {g__cgi_header__##1_str}}
+	}
+
+	\iow_close:N \g_cgi_header_iow
+}
+
+\cs_new:Npn \cgi_header_alias:Nn #1 #2 {
+	\def #1 ##1 {
+		\cgi_header:nn {#2} {##1}
+	}
+}
+
+\iow_new:N \g_cgi_body_iow
+\iow_open:Nn \g_cgi_body_iow {\c_sys_jobname_str.cgi-body}
+
+\msg_new:nnn {my} {header_after_body} {
+	Tried~ to~ add~ a~ header~ after~ some~ body~ content~ was~ written.
+}
+
+\cs_new:Npn \cgi_body:n #1 {
+	\iow_now:Nn \g_cgi_body_iow {#1}
+}
+
+\cs_generate_variant:Nn \cgi_body:n {x}
+
+\let \cgiHeader = \cgi_header:nn
+\let \cgiHeaderX = \cgi_header:xx
+\let \cgiHeaderNX = \cgi_header:nx
+\let \cgiHeaderXN = \cgi_header:xn
+\let \cgiHeaderWrite = \cgi_header_write:
+\let \cgiBody = \cgi_body:n
+\let \cgiBodyX = \cgi_body:x
+\let \cgiIfPath = \cgi_if_path:nT
+\let \cgiPopPath = \cgi_pop_path:n
+\cgi_header_alias:Nn \cgiContentType {Content-Type}
+
+\def \cgiPathInfo {
+	\seq_use:Nn \g_cgi_path_info_seq {/}
+}
+
+\ExplSyntaxOff
+
+\def \cgiEnd {
+	\cgiHeaderWrite
+	\begin{document}
+	~
+	\end{document}
+	\endinput
+}

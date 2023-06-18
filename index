@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+python3 -m http.server 12321 --cgi &
+xdg-open http://localhost:12321/cgi-bin/index
+wait
