@@ -10,7 +10,7 @@ to your grocery list:
 
 - Python 3 + HTTP module (You can substitute it with Apache or nginx)
 - Bourne Again Shell (`bash`)
-- $\LaTeX$ compiler ($\text{pdf }\LaTeX$)
+- $\mathrm{\LaTeX}$ compiler ($\mathrm{pdf \LaTeX}$)
 
 ## Instructions
 
