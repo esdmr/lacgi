@@ -1,0 +1,86 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{utf}
+
+\ExplSyntaxOn
+
+\cs_new:Npn \utf_token_to_codepoint:n #1 {
+	\int_eval:n{`#1} % '
+}
+
+\cs_new:Npn \utf_codepoint_add_length:Nn #1 #2 {
+	\int_compare:nNnTF {#2} < {128}
+		{\int_add:Nn #1 1}
+		{
+			\int_compare:nNnTF {#2} < {2048}
+				{\int_add:Nn #1 2}
+				{
+					\int_compare:nNnTF {#2} < {65536}
+						{\int_add:Nn #1 3}
+						{\int_add:Nn #1 4}
+				}
+		}
+}
+
+\cs_generate_variant:Nn \utf_codepoint_add_length:Nn {Nx}
+
+\int_new:N \l__utf_length_int
+\int_new:N \l__utf_index_int
+
+\cs_new:Npn \utf_string_to_intarray:NN #1 #2 {
+	\int_zero:N \l__utf_length_int
+
+	\str_map_inline:Nn #1 {
+		\utf_codepoint_add_length:Nx \l__utf_length_int {
+			\utf_token_to_codepoint:n{##1}
+		}
+	}
+
+	\intarray_new:Nn #2 \l__utf_length_int
+	\int_zero:N \l__utf_index_int
+
+	\str_map_inline:Nn #1 {
+		\int_set:Nn \l_tmpa_int {\utf_token_to_codepoint:n{##1}}
+
+		\int_compare:nNnTF {\l_tmpa_int} < {128}
+			{
+				\intarray_gset:Nnn #2 {\l__utf_index_int + 1} {\l_tmpa_int}
+				\int_add:Nn \l__utf_index_int 1
+			}
+			{
+				\int_compare:nNnTF {\l_tmpa_int} < {2048}
+					{
+						\intarray_gset:Nnn #2 {\l__utf_index_int + 1} {\int_div_truncate:nn{\l_tmpa_int}{64} + 192}
+						\intarray_gset:Nnn #2 {\l__utf_index_int + 2} {\int_mod:nn{\l_tmpa_int}{64} + 128}
+						\int_add:Nn \l__utf_index_int 2
+					}
+					{
+						\int_compare:nNnTF {\l_tmpa_int} < {65536}
+							{
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 1} {\int_div_truncate:nn{\l_tmpa_int}{4096} + 224}
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 2} {\int_mod:nn{\int_div_truncate:nn{\l_tmpa_int}{64}}{4096} + 128}
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 3} {\int_mod:nn{\l_tmpa_int}{64} + 128}
+								\int_add:Nn \l__utf_index_int 1
+							}
+							{
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 1} {\int_div_truncate:nn{\l_tmpa_int}{262144} + 240}
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 2} {\int_mod:nn{\int_div_truncate:nn{\l_tmpa_int}{4096}}{262144} + 128}
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 3} {\int_mod:nn{\int_div_truncate:nn{\l_tmpa_int}{64}}{4096} + 128}
+								\intarray_gset:Nnn #2 {\l__utf_index_int + 4} {\int_mod:nn{\l_tmpa_int}{64} + 128}
+								\int_add:Nn \l__utf_index_int 1
+							}
+					}
+			}
+	}
+}
+
+\cs_new:Npn \utf_intarray_to_tl:NNn #1 #2 #3 {
+	\int_step_variable:nNn {\intarray_count:N #2} \l_tmpa_int {
+		\int_compare:nNnT \l_tmpa_int > 1 {
+				\tl_put_right:Nn #1 {#3}
+			}
+		\int_set:Nn \l_tmpb_int {\intarray_item:Nn #2 \l_tmpa_int}
+		\tl_put_right:NV #1 {\l_tmpb_int}
+	}
+}
+
+\ExplSyntaxOff
