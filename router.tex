@@ -2,6 +2,8 @@
 \cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>}
 \cgiBodyX{<p>Current path: \cgiPathInfo}
 
+\dbTest
+
 \cgiIfPath{admin}{
 	\cgiPopPath{
 		\cgiBody{<p>You are inside the admin directory!}

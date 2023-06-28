@@ -1,0 +1,70 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{db}
+
+\ExplSyntaxOn
+
+\cs_new:Npn \db_query:Nn #1 #2 {
+	\sys_get_shell:nnN { ./dbctl.py ~ #2 } {
+		\cctab_select:N \c_other_cctab
+		\endlinechar=10~
+	} \l_tmpa_tl
+	\tl_trim_spaces:N \l_tmpa_tl
+	\str_set:Nx #1 {\tl_to_str:N \l_tmpa_tl}
+}
+
+\cs_generate_variant:Nn \db_query:Nn {Nx}
+
+\cs_new:Npn \db_escape:N #1 {
+	\str_replace_all:Nnn #1 {'} {' \' '}
+}
+
+\cs_new:Npn \db_eval:Nn #1 #2 {
+	\str_set:Nn \l_tmpa_str {#2}
+	\db_escape:N \l_tmpa_str
+	\db_query:Nx #1 {script ~ '\l_tmpa_str'}
+}
+
+\cs_new:Npn \db_print:Nn #1 #2 {
+	\str_set:Nn \l_tmpa_str {#2}
+	\db_escape:N \l_tmpa_str
+	\db_query:Nx #1 {run ~ '\l_tmpa_str'}
+}
+
+\cs_new:Npn \db_print:Nnn #1 #2 #3 {
+	\str_set:Nn \l_tmpa_str {#2}
+	\db_escape:N \l_tmpa_str
+	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ #3}
+}
+
+\cs_generate_variant:Nn \regex_split:nnN {nxN}
+\seq_new:N \l__db_iterate_row_seq
+\cs_new:Npn \db_iterate_function:NN #1 #2 {
+	\regex_split:nxN {\n} {\str_use:N #1} \l__db_iterate_row_seq
+
+	\seq_map_inline:Nn \l__db_iterate_row_seq {
+		\tl_if_empty:nF {##1} {
+			\regex_split:nxN {\s} {##1} \l__db_iterate_col_seq
+			#2\l__db_iterate_col_seq\relax
+		}
+	}
+}
+
+\cs_new:Npn \__db_test:N #1 {
+	\cgi_body:n{<tr>}
+	\seq_map_inline:Nn #1 {
+		\cgi_body:n{<td>##1}
+	}
+}
+
+\cs_new:Npn \db_test: {
+	\str_new:N \g_db_test_str
+	\db_print:Nn \g_db_test_str {select ~ * ~ from ~ test}
+
+	\cgi_body:n{<table><thead><tr><th>x<th>y<tbody>}
+	\db_iterate_function:NN \g_db_test_str \__db_test:N
+	\cgi_body:n{</table>}
+}
+
+\let \dbTest = \db_test:
+
+\ExplSyntaxOff

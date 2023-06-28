@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+./dbd.py &
 python3 -m http.server 12321 --cgi &
 xdg-open http://localhost:12321/cgi-bin/index
 wait

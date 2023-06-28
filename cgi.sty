@@ -4,7 +4,9 @@
 \ExplSyntaxOn
 
 \cs_new:Npn \g_cgi_env:Nn #1 #2 {
-	\sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } { } \l_tmpa_tl
+	\sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } {
+		\char_set_catcode_space:N \ %
+	} \l_tmpa_tl
 	\tl_trim_spaces:N \l_tmpa_tl
 	\str_const:Nx #1 {\tl_tail:N \l_tmpa_tl}
 }
