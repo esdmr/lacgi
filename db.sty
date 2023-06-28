@@ -49,22 +49,4 @@
 	}
 }
 
-\cs_new:Npn \__db_test:N #1 {
-	\cgi_body:n{<tr>}
-	\seq_map_inline:Nn #1 {
-		\cgi_body:n{<td>##1}
-	}
-}
-
-\cs_new:Npn \db_test: {
-	\str_new:N \g_db_test_str
-	\db_print:Nn \g_db_test_str {select ~ * ~ from ~ test}
-
-	\cgi_body:n{<table><thead><tr><th>x<th>y<tbody>}
-	\db_iterate_function:NN \g_db_test_str \__db_test:N
-	\cgi_body:n{</table>}
-}
-
-\let \dbTest = \db_test:
-
 \ExplSyntaxOff
