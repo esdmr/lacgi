@@ -1,7 +1,8 @@
 # $\mathrm{L\kern-.325em\raise.21em{\scriptstyle{A}}\kern-.17emCGI}$
 
-$\mathrm{\LaTeX}$-based HTTP request router via CGI. Not production ready. Will
-never be. Please don’t use. It’s only a joke.
+$\mathrm{X\kern-.1em\lower.5ex\hbox{Ǝ}\kern-.13em\LaTeX\hspace{0.5em}}$-based
+HTTP request router via CGI. Not production ready. Will never be. Please don’t
+use. It’s only a joke.
 
 I know ~50% of the code is in Python. That’s just the database integration. Yes,
 this behemoth will support database connection and user authentication. No, you
@@ -14,7 +15,8 @@ to your grocery list:
 
 - Python 3 + HTTP module (You can substitute it with Apache or nginx)
 - Bourne Again Shell (`bash`)
-- $\mathrm{\LaTeX}$ compiler ($\mathrm{pdf \LaTeX}$)
+- $\mathrm{X\kern-.1em\lower.5ex\hbox{Ǝ}\kern-.13em\LaTeX\hspace{0.5em}}$
+  compiler
 
 ## Instructions
 

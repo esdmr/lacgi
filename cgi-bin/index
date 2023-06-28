@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
-cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" >/dev/null
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null
 cd .. >/dev/null
 
 TEMP_OUT_DIR="$(mktemp -d)"
-latex -draftmode -file-line-error -halt-on-error -interaction=batchmode \
-	-output-directory="$TEMP_OUT_DIR" -shell-escape index.tex >/dev/null \
-	|| { cat "$TEMP_OUT_DIR/index.log";exit; }
+xelatex -file-line-error -halt-on-error -interaction=batchmode -no-pdf \
+	-output-directory="$TEMP_OUT_DIR" -shell-escape index.tex >/dev/null ||
+	{
+		cat "$TEMP_OUT_DIR/index.log"
+		exit
+	}
 cat "$TEMP_OUT_DIR/index.cgi-header"
 echo
 cat "$TEMP_OUT_DIR/index.cgi-body"
