@@ -28,6 +28,10 @@
 		\iow_now:Nx \g_cgi_header_iow {##1:~##2}
 	}
 
+	\seq_map_inline:Nn \g_cgi_cookies_seq {
+		\iow_now:Nx \g_cgi_header_iow {##1}
+	}
+
 	\iow_close:N \g_cgi_header_iow
 }
 

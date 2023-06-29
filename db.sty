@@ -33,11 +33,50 @@
 \cs_new:Npn \db_print:Nnn #1 #2 #3 {
 	\str_set:Nn \l_tmpa_str {#2}
 	\db_escape:N \l_tmpa_str
-	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ #3}
+	\str_set:Nn \l_tmpb_str {#3}
+	\db_escape:N \l_tmpb_str
+	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str'}
 }
 
+\str_new:N \l_tmpc_str
+\cs_new:Npn \db_print:Nnnn #1 #2 #3 #4 {
+	\str_set:Nn \l_tmpa_str {#2}
+	\db_escape:N \l_tmpa_str
+	\str_set:Nn \l_tmpb_str {#3}
+	\db_escape:N \l_tmpb_str
+	\str_set:Nn \l_tmpc_str {#4}
+	\db_escape:N \l_tmpc_str
+	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str' ~ '\l_tmpc_str'}
+}
+
+\str_new:N \l_tmpd_str
+\cs_new:Npn \db_print:Nnnnn #1 #2 #3 #4 #5 {
+	\str_set:Nn \l_tmpa_str {#2}
+	\db_escape:N \l_tmpa_str
+	\str_set:Nn \l_tmpb_str {#3}
+	\db_escape:N \l_tmpb_str
+	\str_set:Nn \l_tmpc_str {#4}
+	\db_escape:N \l_tmpc_str
+	\str_set:Nn \l_tmpd_str {#4}
+	\db_escape:N \l_tmpd_str
+	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str' ~ '\l_tmpc_str' ~ '\l_tmpd_str'}
+}
+
+\cs_generate_variant:Nn \db_print:Nnn {Nnx}
+\cs_generate_variant:Nn \db_print:Nnnn {Nnnx}
+\cs_generate_variant:Nn \db_print:Nnnn {Nnxn}
+\cs_generate_variant:Nn \db_print:Nnnn {Nnxx}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnnnx}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnnxn}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnnxx}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnxnn}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnxnx}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnxxn}
+\cs_generate_variant:Nn \db_print:Nnnnn {Nnxxx}
+
 \seq_new:N \l__db_iterate_row_seq
-\cs_new:Npn \db_iterate_function:NN #1 #2 {
+\seq_new:N \l__db_iterate_col_seq
+\cs_new:Npn \db_iterate_table_function:NN #1 #2 {
 	\regex_split:nxN {\n} {\str_use:N #1} \l__db_iterate_row_seq
 
 	\seq_map_inline:Nn \l__db_iterate_row_seq {
@@ -46,6 +85,25 @@
 			#2\l__db_iterate_col_seq\relax
 		}
 	}
+}
+
+\cs_new:Npn \db_iterate_table_inline:Nn #1 #2 {
+	\cs_new:Npn \__db_iterate_table_function:N ##1 {#2}
+	\cs_new:Npn \db_iterate_table_function:NN #1 \__db_iterate_table_function:N
+	\cs_undefine:N \__db_iterate_table_function:N
+}
+
+\cs_new:Npn \db_iterate_row:NN #1 #2 {
+	\tl_if_empty:NF #1 {
+		\regex_split:nxN {\t} {#1} \l__db_iterate_col_seq
+		#2\l__db_iterate_col_seq\relax
+	}
+}
+
+\cs_new:Npn \db_iterate_row_inline:Nn #1 #2 {
+	\cs_new:Npn \__db_iterate_row_function:N ##1 {#2}
+	\cs_new:Npn \db_iterate_row_function:NN #1 \__db_iterate_row_function:N
+	\cs_undefine:N \__db_iterate_row_function:N
 }
 
 \ExplSyntaxOff

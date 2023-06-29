@@ -27,7 +27,7 @@
 
 \cs_new:Npn \hash_done_iterative:N #1 {
 	\hash_done_once:N #1
-	\int_step_inline:nn {1023} {
+	\int_step_inline:nn {511} {
 		\hash_init:
 		\hash_write:x{#1}
 		\hash_write:n{##1}

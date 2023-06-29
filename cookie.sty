@@ -75,10 +75,11 @@
 	\__cgi_cookie_unescape:N #1
 }
 
+\seq_new:N \g_cgi_cookies_seq
 \cs_new:Npn \cgi_set_cookie:nN #1 #2 {
 	\__cgi_cookie_escape:NN \l_tmpa_str #2
 	% Since LaCGI is for personal use only, cookies need not be secure.
-	\cgi_header:nx {Set-Cookie} {#1 = \l_tmpa_str; SameSite=Strict; HttpOnly}
+	\seq_put_right:Nx \g_cgi_cookies_seq {Set-Cookie: #1 = \l_tmpa_str; SameSite=Strict; HttpOnly}
 }
 
 \let \cgiGetCookie = \cgi_get_cookie:Nn

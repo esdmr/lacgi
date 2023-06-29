@@ -1,0 +1,49 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{auth}
+
+\ExplSyntaxOn
+
+\str_new:N \l__auth_user_str
+\str_new:N \l__auth_pass_str
+\bool_new:N \g__auth_logged_in_bool
+\prg_new_conditional:Npnn \auth_if_logged_in: { TF, T, F } {
+	\cgi_get_cookie:Nn \l__auth_user_str {u}
+	\str_if_empty:NTF \l__auth_user_str {
+		\prg_return_false:
+	} {
+		\cgi_get_cookie:Nn \l__auth_pass_str {p}
+		\str_if_empty:NTF \l__auth_pass_str {
+			\prg_return_false:
+		} {
+			\db_print:Nnx \l_tmpa_str {select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?} {\l__auth_user_str}
+			\str_if_empty:NTF \l_tmpa_str {
+				\prg_return_false:
+			} {
+				\regex_split:nxN {\s} {\l_tmpa_str} \l__db_iterate_col_seq
+				\str_set:Nx \l_tmpa_str {\seq_item:Nn \l__db_iterate_col_seq {1}}
+				\str_set:Nx \l_tmpb_str {\seq_item:Nn \l__db_iterate_col_seq {2}}
+				\hash_init:
+				\hash_write:x{\l__auth_pass_str}
+				\hash_write:x{\l_tmpa_str}
+				\hash_done_iterative:N \l_tmpa_str
+				\str_if_eq:NNTF\l_tmpa_str\l_tmpb_str{
+					\bool_gset_true:N \g__auth_logged_in_bool
+					\prg_return_true:
+				}{
+					\prg_return_false:
+				}
+			}
+		}
+	}
+}
+
+\msg_new:nnn{auth}{noauth}{You~ are~ supposed~ to~ check~ if~ user~ is~ auth'd~ first.}
+
+\cs_new:Npn \auth_get_name: {
+	\str_use:N \l__auth_user_str
+}
+
+\let \authIfLoggedIn = \auth_if_logged_in:T
+\let \authGetName = \auth_get_name:
+
+\ExplSyntaxOff
