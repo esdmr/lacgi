@@ -1,0 +1,16 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hash}
+
+\ExplSyntaxOn
+
+\tl_const:Nn \c_hash_file_tl {\c_sys_jobname_str.hash-txt}
+\iow_new:N \g_hash_iow
+
+\cs_new:Npn \hash:Nn #1 #2 {
+	\iow_open:Nn \g_hash_iow {\c_hash_file_tl}
+	\iow_now:Nn \g_hash_iow {#2}
+	\iow_close:N \g_hash_iow
+	\file_get_mdfive_hash:nN {\c_hash_file_tl} #1
+}
+
+\ExplSyntaxOff
