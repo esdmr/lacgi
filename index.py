@@ -38,7 +38,10 @@ class BufferedCGIHTTPRequestHandler(CGIHTTPRequestHandler):
                 headers.append(line)
 
         self.original_wfile.write("".join(headers).encode())
-        if (body): self.original_wfile.write(body)
+
+        if (body):
+            self.original_wfile.write(b"\n")
+            self.original_wfile.write(body)
 
 
 with HTTPServer(("localhost", 12321), BufferedCGIHTTPRequestHandler) as httpd:
