@@ -1,13 +1,10 @@
 \cgiContentType{text/html}
-\cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>}
-\cgiBodyX{<p>Current path: \cgiPathInfo}
+\cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>test}
 
-\cgiIfPath{admin}{
-	\cgiPopPath{
-		\cgiBody{<p>You are inside the admin directory!}
-		\cgiBodyX{<p>Current path: \cgiPathInfo}
-	}
-	\cgiEnd
-}
+\strNew\tmpStr
 
-\cgiBody{<p>You are a normal user…, boring.}
+\cgiGetCookie\tmpStr{test}
+\cgiBodyX{Cookie is: \strUse\tmpStr}
+
+\strSet\tmpStr{Hello 👀}
+\cgiSetCookie{test}\tmpStr

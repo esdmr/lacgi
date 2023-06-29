@@ -36,7 +36,6 @@
 	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ #3}
 }
 
-\cs_generate_variant:Nn \regex_split:nnN {nxN}
 \seq_new:N \l__db_iterate_row_seq
 \cs_new:Npn \db_iterate_function:NN #1 #2 {
 	\regex_split:nxN {\n} {\str_use:N #1} \l__db_iterate_row_seq

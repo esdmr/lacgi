@@ -1,0 +1,11 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{variants}
+
+\ExplSyntaxOn
+
+\cs_generate_variant:Nn \str_set:Nn {Nx}
+\cs_generate_variant:Nn \str_put_right:Nn {Nx}
+\cs_generate_variant:Nn \regex_split:nnN {nxN}
+\cs_generate_variant:Nn \regex_extract_all:nnN {nxN}
+
+\ExplSyntaxOff
