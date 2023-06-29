@@ -1,10 +1,21 @@
 \cgiContentType{text/html}
-\cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>test}
+\cgiBody{<!DOCTYPE html><meta charset=UTF-8><title>LaCGI</title>}
 
 \strNew\tmpStr
 
 \cgiGetCookie\tmpStr{test}
-\cgiBodyX{Cookie is: \strUse\tmpStr}
+\cgiBodyX{Cookie is: \tmpStr<br>}
+
+\strNew\saltStr
+\strSetX\saltStr{\hashSalt}
+\cgiBodyX{Salt is: \saltStr<br>}
+
+\hashInit
+\hashWriteX{\tmpStr}
+\hashWriteX{\saltStr}
+\hashDoneIterative \tmpStr
+\cgiBodyX{Hash is: \tmpStr<br>}
+
 
 \strSet\tmpStr{Hello 👀}
 \cgiSetCookie{test}\tmpStr

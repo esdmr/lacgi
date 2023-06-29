@@ -4,13 +4,64 @@
 \ExplSyntaxOn
 
 \tl_const:Nn \c_hash_file_tl {\c_sys_jobname_str.hash-txt}
-\iow_new:N \g_hash_iow
+\iow_new:N \g__hash_iow
 
-\cs_new:Npn \hash:Nn #1 #2 {
-	\iow_open:Nn \g_hash_iow {\c_hash_file_tl}
-	\iow_now:Nn \g_hash_iow {#2}
-	\iow_close:N \g_hash_iow
+\cs_new:Npn \hash_init: {
+	\iow_open:Nn \g__hash_iow {\c_hash_file_tl}
+}
+
+\cs_new:Npn \hash_write:n #1 {
+	\iow_now:Nn \g__hash_iow {#1}
+}
+
+\cs_generate_variant:Nn \hash_write:n {x}
+
+\cs_new:Npn \hash_done_once:N #1 {
+	% Pepper
+	\iow_now:Nn \g__hash_iow {
+		PzawODs+iLA1d54/CiG/mEmLwVznG0zC5/F+4jligpauvhg
+	}
+	\iow_close:N \g__hash_iow
 	\file_get_mdfive_hash:nN {\c_hash_file_tl} #1
 }
+
+\cs_new:Npn \hash_done_iterative:N #1 {
+	\hash_done_once:N #1
+	\int_step_inline:nn {1023} {
+		\hash_init:
+		\hash_write:x{#1}
+		\hash_write:n{##1}
+		\hash_done_once:N #1
+	}
+}
+
+\cs_new:Npn \__hash_int_to_base_sixty_four:n #1 {
+	\int_to_symbols:nnn {#1} {64} {
+		{0}{A}{1}{B}{2}{C}{3}{D}{4}{E}{5}{F}{6}{G}{7}{H}{8}{I}{9}{J}
+		{10}{K}{11}{L}{12}{M}{13}{N}{14}{O}{15}{P}{16}{Q}{17}{R}{18}{S}{19}{T}
+		{20}{U}{21}{V}{22}{W}{23}{X}{24}{Y}{25}{Z}{26}{a}{27}{b}{28}{c}{29}{d}
+		{30}{e}{31}{f}{32}{g}{48}{w}{33}{h}{34}{i}{35}{j}{36}{k}{37}{l}{38}{m}
+		{39}{n}{40}{o}{41}{p}{42}{q}{43}{r}{44}{s}{45}{t}{46}{u}{47}{v}{49}{x}
+		{50}{y}{51}{z}{52}{0}{53}{1}{54}{2}{55}{3}{56}{4}{57}{5}{58}{6}{59}{7}
+		{60}{8}{61}{9}{62}{+}{63}{/}
+	}
+}
+
+\cs_new:Npn \hash_salt: {
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+	\__hash_int_to_base_sixty_four:n{\int_rand:nn{16777216}{1073741823}}
+}
+
+\let \hashInit = \hash_init:
+\let \hashWrite = \hash_write:n
+\let \hashWriteX = \hash_write:x
+\let \hashDoneOnce = \hash_done_once:N
+\let \hashDoneIterative = \hash_done_iterative:N
+\let \hashSalt = \hash_salt:
 
 \ExplSyntaxOff
