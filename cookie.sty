@@ -1,0 +1,87 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cookie}
+
+\ExplSyntaxOn
+
+\g_cgi_env:Nn \c_cgi_http_cookie_str {HTTP_COOKIE}
+\prop_new:N \g_cgi_http_cookie_prop
+
+\regex_split:nxN {;} {\c_cgi_http_cookie_str} \l_tmpa_seq
+\seq_map_inline:Nn \l_tmpa_seq {
+	\regex_split:nnN {=} {#1} \l_tmpb_seq
+	\tl_set:Nx \l_tmpa_tl {\seq_item:Nn \l_tmpb_seq {1}}
+	\tl_trim_spaces:N \l_tmpa_tl
+	\tl_set:Nx \l_tmpb_tl {\seq_item:Nn \l_tmpb_seq {2}}
+	\tl_trim_spaces:N \l_tmpb_tl
+	\prop_put:Nxx \g_cgi_http_cookie_prop {\l_tmpa_tl} {\l_tmpb_tl}
+}
+
+\cs_new:Npn \__cgi_token_to_codepoint:n #1 {
+	\int_eval:n{`#1} % '}
+}
+
+\cs_new:Npn \__cgi_cookie_escape:NN #1 #2 {
+	\str_clear:N #1
+	\str_map_inline:Nn #2 {
+		\int_set:Nn \l_tmpa_int {\__cgi_token_to_codepoint:n {##1}}
+		\bool_lazy_any:nTF{
+				{\bool_lazy_and_p:nn
+					{\int_compare_p:nNn {\l_tmpa_int} > {34}}
+					{\int_compare_p:nNn {\l_tmpa_int} < {44}}
+				}
+				{\bool_lazy_and_p:nn
+					{\int_compare_p:nNn {\l_tmpa_int} > {44}}
+					{\int_compare_p:nNn {\l_tmpa_int} < {59}}
+				}
+				{\bool_lazy_and_p:nn
+					{\int_compare_p:nNn {\l_tmpa_int} > {59}}
+					{\int_compare_p:nNn {\l_tmpa_int} < {92}}
+				}
+				{\bool_lazy_and_p:nn
+					{\int_compare_p:nNn {\l_tmpa_int} > {92}}
+					{\int_compare_p:nNn {\l_tmpa_int} < {127}}
+				}
+		}{
+			\str_put_right:Nn #1 {##1}
+		}{
+			\str_put_right:Nx #1 {!\int_use:N\l_tmpa_int!}
+		}
+	}
+}
+
+\cs_new:Npn \__cgi_cookie_unescape_x:w ! #1 ! \q_stop {
+	\str_put_right:Nx \l_tmpa_str {\char_generate:nn{#1}{12}}
+}
+
+\cs_new:Npn \__cgi_cookie_unescape_c:w #1 \q_stop {
+	\str_put_right:Nn \l_tmpa_str {#1}
+}
+
+\cs_new:Npn \__cgi_cookie_unescape:w {
+	\peek_charcode:NTF ! {\__cgi_cookie_unescape_x:w} {\__cgi_cookie_unescape_c:w}
+}
+
+\cs_new:Npn \__cgi_cookie_unescape:N #1 {
+	\str_clear:N \l_tmpa_str
+	\regex_extract_all:nxN{[^!]+|!\d+!}{#1}\l_tmpa_seq
+	\seq_map_inline:Nn \l_tmpa_seq {
+		\__cgi_cookie_unescape:w ##1 \q_stop
+	}
+	\str_set_eq:NN #1 \l_tmpa_str
+}
+
+\cs_new:Npn \cgi_get_cookie:Nn #1 #2 {
+	\str_set:Nx #1 {\prop_item:Nn \g_cgi_http_cookie_prop {#2}}
+	\__cgi_cookie_unescape:N #1
+}
+
+\cs_new:Npn \cgi_set_cookie:nN #1 #2 {
+	\__cgi_cookie_escape:NN \l_tmpa_str #2
+	% Since LaCGI is for personal use only, cookies need not be secure.
+	\cgi_header:nx {Set-Cookie} {#1 = \l_tmpa_str; SameSite=Strict; HttpOnly}
+}
+
+\let \cgiGetCookie = \cgi_get_cookie:Nn
+\let \cgiSetCookie = \cgi_set_cookie:nN
+
+\ExplSyntaxOff

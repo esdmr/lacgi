@@ -1,0 +1,37 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{path}
+
+\ExplSyntaxOn
+
+\g_cgi_env:Nn \c_cgi_path_info_str {PATH_INFO}
+\str_set:Nx \c_cgi_path_info_str {\str_tail:N \c_cgi_path_info_str}
+\seq_new:N \g_cgi_path_info_seq
+
+\regex_split:nxN {/} {\str_use:N \c_cgi_path_info_str} \g_cgi_path_info_seq
+
+\prg_new_conditional:Npnn \cgi_if_path:n #1 { TF, T, F } {
+	\seq_get_left:NN \g_cgi_path_info_seq \l_tmpa_tl
+	\str_set:Nx \l_tmpa_str {\tl_to_str:N \l_tmpa_tl}
+	\str_set:Nx \l_tmpb_str {#1}
+
+	\str_if_eq:NNTF \l_tmpa_str \l_tmpb_str {
+		\prg_return_true:
+	} {
+		\prg_return_false:
+	}
+}
+
+\cs_new:Npn \cgi_pop_path:n #1 {
+	{
+			\seq_pop_left:NN \g_cgi_path_info_seq \l_tmpa_tl
+			#1
+		}
+}
+
+\let \cgiIfPath = \cgi_if_path:nT
+\let \cgiPopPath = \cgi_pop_path:n
+\def \cgiPathInfo {
+	\seq_use:Nn \g_cgi_path_info_seq {/}
+}
+
+\ExplSyntaxOff
