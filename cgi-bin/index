@@ -3,12 +3,16 @@
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null
 cd .. >/dev/null
 
-TEMP_OUT_DIR="$(mktemp -d)"
+TEMP_OUT_DIR="$(mktemp -d .tmp.XXXXXXXXXX)"
 xelatex -file-line-error -halt-on-error -interaction=batchmode -no-pdf \
 	-output-directory="$TEMP_OUT_DIR" -shell-escape index.tex >/dev/null ||
 	{
+		echo Status: 500 Internal Server Error
+		echo Content-Type: text/plain
+		echo
+		echo '$ cat "$TEMP_OUT_DIR/index.log"'
 		cat "$TEMP_OUT_DIR/index.log"
-		exit
+		exit 1
 	}
 cat "$TEMP_OUT_DIR/index.cgi-header"
 echo
