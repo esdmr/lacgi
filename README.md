@@ -4,8 +4,8 @@ $\mathrm{X\kern-.1em\lower.5ex\hbox{Ǝ}\kern-.13em\LaTeX\hspace{0.5em}}$-based
 HTTP request router via CGI. Not production ready. Will never be. Please don’t
 use. It’s only a joke.
 
-I know ~50% of the code is in Python. That’s just the database integration. Yes,
-this behemoth will support database connection and user authentication. No, you
+I know ~23% of the code is in Python. That’s just the database integration. Yes,
+this behemoth supports database connection and user authentication. No, you
 shouldn’t trust it.
 
 ## Ingredients
