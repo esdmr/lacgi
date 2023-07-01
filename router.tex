@@ -15,9 +15,14 @@
 \cgiIfPath{login}{
 	\cgiIfPOST{
 		\cgiProcessRequest
-		\authLogin
-		\cgiStatus{303 See Other}
-		\cgiLocation{/cgi-bin/index}
+		\authLogin{
+			\cgiStatus{303 See Other}
+			\cgiLocation{/cgi-bin/index}
+		}{
+			\cgiHeader{Status}{400 Bad Request}
+			\cgiBody{Invalid username or password}
+			\cgiEnd
+		}
 	}
 
 	\cgiBody{<form action="" method="post">}
@@ -31,9 +36,14 @@
 \cgiIfPath{signup}{
 	\cgiIfPOST{
 		\cgiProcessRequest
-		\authSignup
-		\cgiStatus{303 See Other}
-		\cgiLocation{/cgi-bin/index}
+		\authSignup{
+			\cgiStatus{303 See Other}
+			\cgiLocation{/cgi-bin/index}
+		}{
+			\cgiHeader{Status}{400 Bad Request}
+			\cgiBody{Invalid username or password}
+			\cgiEnd
+		}
 	}
 
 	\cgiBody{<form action="" method="post">}

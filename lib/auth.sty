@@ -56,31 +56,40 @@
 	\str_use:N \l__auth_user_str
 }
 
+\prg_new_conditional:Npnn \auth_login: { TF, T, F } {
 	\cgi_get_request:Nn \l__auth_user_str {u}
 	\str_if_empty:NTF \l__auth_user_str {
+		\prg_return_false:
 	} {
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
+			\prg_return_false:
 		} {
 			\__auth_if_logged_in:TF {
 				\cgi_set_cookie:nN {u} \l__auth_user_str
 				\cgi_set_cookie:nN {p} \l__auth_pass_str
+				\prg_return_true:
 			} {
+				\prg_return_false:
 			}
 		}
 	}
 }
 
+\prg_new_conditional:Npnn \auth_signup: { TF, T, F } {
 	\cgi_get_request:Nn \l__auth_user_str {u}
 	\str_if_empty:NTF \l__auth_user_str {
+		\prg_return_false:
 	}{
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
+			\prg_return_false:
 		}{
 			\db_print:Nnx \l_tmpa_str
 			{select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?;}
 			{\l__auth_user_str}
 			\str_if_empty:NTF \l_tmpa_str {
+				\prg_return_false:
 			}{
 				\str_set:Nx \l_tmpa_str {\hash_salt:}
 				\hash_init:
@@ -93,6 +102,7 @@
 				{\l__auth_user_str} {\l_tmpa_str} {\l_tmpb_str}
 				\cgi_set_cookie:nN {u} \l__auth_user_str
 				\cgi_set_cookie:nN {p} \l__auth_pass_str
+				\prg_return_true:
 			}
 		}
 	}
@@ -100,5 +110,7 @@
 
 \let \authIfLoggedIn = \auth_if_logged_in:T
 \let \authGetName = \auth_get_name:
+\let \authLogin = \auth_login:TF
+\let \authSignup = \auth_signup:TF
 
 \ExplSyntaxOff
