@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{auth}
+\ProvidesPackage{lib/auth}
 
 \ExplSyntaxOn
 
@@ -56,51 +56,31 @@
 	\str_use:N \l__auth_user_str
 }
 
-\cs_new:Npn \auth_login: {
 	\cgi_get_request:Nn \l__auth_user_str {u}
 	\str_if_empty:NTF \l__auth_user_str {
-		\cgi_header:nn{Status}{400 Bad Request}
-		\cgi_body:n{Invalid~ username~ or~ password}
-		\cgi_end:
 	} {
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
-			\cgi_header:nn{Status}{400 Bad Request}
-			\cgi_body:n{Invalid~ username~ or~ password}
-			\cgi_end:
 		} {
 			\__auth_if_logged_in:TF {
 				\cgi_set_cookie:nN {u} \l__auth_user_str
 				\cgi_set_cookie:nN {p} \l__auth_pass_str
 			} {
-				\cgi_header:nn{Status}{400 Bad Request}
-				\cgi_body:n{Invalid~ username~ or~ password}
-				\cgi_end:
 			}
 		}
 	}
 }
 
-\cs_new:Npn \auth_signup: {
 	\cgi_get_request:Nn \l__auth_user_str {u}
 	\str_if_empty:NTF \l__auth_user_str {
-		\cgi_header:nn{Status}{400 Bad Request}
-		\cgi_body:n{Invalid~ username~ or~ password}
-		\cgi_end:
 	}{
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
-			\cgi_header:nn{Status}{400 Bad Request}
-			\cgi_body:n{Invalid~ username~ or~ password}
-			\cgi_end:
 		}{
 			\db_print:Nnx \l_tmpa_str
 			{select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?;}
 			{\l__auth_user_str}
 			\str_if_empty:NTF \l_tmpa_str {
-				\cgi_header:nn{Status}{400 Bad Request}
-				\cgi_body:n{Invalid~ username~ or~ password}
-				\cgi_end:
 			}{
 				\str_set:Nx \l_tmpa_str {\hash_salt:}
 				\hash_init:
@@ -120,7 +100,5 @@
 
 \let \authIfLoggedIn = \auth_if_logged_in:T
 \let \authGetName = \auth_get_name:
-\let \authLogin = \auth_login:
-\let \authSignup = \auth_signup:
 
 \ExplSyntaxOff
