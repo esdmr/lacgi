@@ -1,0 +1,21 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{method}
+
+\ExplSyntaxOn
+
+\cgi_env:Nn \c_cgi_request_method_str {REQUEST_METHOD}
+\str_set:Nx \c_cgi_request_method_str {\str_uppercase:f{\c_cgi_request_method_str}}
+
+\cs_new:Npn \cgi_method_alias:Nn #1 #2 {
+	\def #1 ##1 {
+		\str_set:Nx \l_tmpa_str {\str_uppercase:n{#2}}
+		\str_if_eq:NNT \c_cgi_request_method_str \l_tmpa_str {
+			##1
+		}
+	}
+}
+
+\cgi_method_alias:Nn \cgiIfGET {GET}
+\cgi_method_alias:Nn \cgiIfPOST {POST}
+
+\ExplSyntaxOff

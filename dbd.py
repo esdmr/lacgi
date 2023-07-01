@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import http.server
+import json
 import os
 import socketserver
 import sqlite3
-import json
 
 
 def to_bytes(s: str):
@@ -15,7 +15,7 @@ class DbRequestHandler(http.server.BaseHTTPRequestHandler):
         msg = to_bytes(str(e))
         self.send_response_only(400)
         self.send_header("Content-type", "text/plain")
-        self.send_header("Content-Length", len(msg))
+        self.send_header("Content-Length", str(len(msg)))
         self.end_headers()
         self.wfile.write(msg)
 
@@ -23,15 +23,15 @@ class DbRequestHandler(http.server.BaseHTTPRequestHandler):
         msg = b"Unknown error\n"
         self.send_response_only(500)
         self.send_header("Content-type", "text/plain")
-        self.send_header("Content-Length", len(msg))
+        self.send_header("Content-Length", str(len(msg)))
         self.end_headers()
         self.wfile.write(msg)
 
     def do_POST(self):
         try:
-            content = self.rfile.read(int(self.headers.get("Content-Length"))).decode(
-                "UTF-8"
-            )
+            content = self.rfile.read(
+                int(self.headers.get("Content-Length") or 0)
+            ).decode("UTF-8")
 
             if self.path.startswith("/script"):
                 with con:
@@ -42,13 +42,14 @@ class DbRequestHandler(http.server.BaseHTTPRequestHandler):
                 with con:
                     l = json.loads(content)
                     assert isinstance(l, list)
-                    for i in l: assert isinstance(i, str)
+                    for i in l:
+                        assert isinstance(i, str)
                     cur = con.cursor().execute(l[0], l[1::])
                     result = to_bytes(json.dumps([i for i in cur]))
 
             self.send_response_only(200)
             self.send_header("Content-type", "text/plain")
-            self.send_header("Content-Length", len(result))
+            self.send_header("Content-Length", str(len(result)))
             self.end_headers()
             self.wfile.write(result)
         except sqlite3.OperationalError as e:

@@ -3,7 +3,7 @@
 
 \ExplSyntaxOn
 
-\g_cgi_env:Nn \c_cgi_http_cookie_str {HTTP_COOKIE}
+\cgi_env:Nn \c_cgi_http_cookie_str {HTTP_COOKIE}
 \prop_new:N \g_cgi_http_cookie_prop
 
 \regex_split:nxN {;} {\c_cgi_http_cookie_str} \l_tmpa_seq

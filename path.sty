@@ -3,7 +3,7 @@
 
 \ExplSyntaxOn
 
-\g_cgi_env:Nn \c_cgi_path_info_str {PATH_INFO}
+\cgi_env:Nn \c_cgi_path_info_str {PATH_INFO}
 \str_set:Nx \c_cgi_path_info_str {\str_tail:N \c_cgi_path_info_str}
 \seq_new:N \g_cgi_path_info_seq
 

@@ -13,18 +13,32 @@
 \cgiBody{<p>Not logged in!}
 
 \cgiIfPath{login}{
+	\cgiIfPOST{
+		\cgiProcessRequest
+		\authLogin
+		\cgiStatus{303 See Other}
+		\cgiLocation{/cgi-bin/index}
+	}
+
 	\cgiBody{<form action="" method="post">}
 	\cgiBody{<p><label>Username: <input name="u" autocomplete="username"></label>}
-	\cgiBody{<p><label>Password: <input name="p" autocomplete="current-password"></label>}
+	\cgiBody{<p><label>Password: <input name="p" type="password" autocomplete="current-password"></label>}
 	\cgiBody{<p><button>Login</button>}
 	\cgiBody{</form>}
 	\cgiEnd
 }
 
 \cgiIfPath{signup}{
+	\cgiIfPOST{
+		\cgiProcessRequest
+		\authSignup
+		\cgiStatus{303 See Other}
+		\cgiLocation{/cgi-bin/index}
+	}
+
 	\cgiBody{<form action="" method="post">}
 	\cgiBody{<p><label>Username: <input name="u" autocomplete="username"></label>}
-	\cgiBody{<p><label>Password: <input name="p" autocomplete="new-password"></label>}
+	\cgiBody{<p><label>Password: <input name="p" type="password" autocomplete="new-password"></label>}
 	\cgiBody{<p><button>Signup</button>}
 	\cgiBody{</form>}
 	\cgiEnd

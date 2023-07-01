@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import sys
+import http.client
 import json
-import socket
-import urllib3
 import requests
+import requests.adapters
+import socket
+import sys
+import urllib3
 
 type = sys.argv[1]
 query = sys.argv[2::]
@@ -16,7 +18,7 @@ else:
     path = ""
 
 
-class DbConnection(urllib3.connection.HTTPConnection):
+class DbConnection(http.client.HTTPConnection):
     def __init__(self):
         super().__init__("localhost")
 

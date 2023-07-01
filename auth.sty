@@ -6,6 +6,32 @@
 \str_new:N \l__auth_user_str
 \str_new:N \l__auth_pass_str
 \bool_new:N \g__auth_logged_in_bool
+\prg_new_conditional:Npnn \__auth_if_logged_in: { TF, T, F } {
+	\db_print:Nnx \l_tmpa_str
+	{select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?;}
+	{\l__auth_user_str}
+	\regex_split:nxN {\s} {\l_tmpa_str} \l__db_iterate_col_seq
+	\str_set:Nx \l_tmpa_str {\seq_item:Nn \l__db_iterate_col_seq {1}}
+	\str_set:Nx \l_tmpb_str {\seq_item:Nn \l__db_iterate_col_seq {2}}
+	\str_if_empty:NTF \l_tmpa_str {
+		\prg_return_false:
+	} {
+		\str_if_empty:NTF \l_tmpb_str {
+			\prg_return_false:
+		} {
+			\hash_init:
+			\hash_write:x{\l__auth_pass_str}
+			\hash_write:x{\l_tmpa_str}
+			\hash_done_iterative:N \l_tmpa_str
+			\str_if_eq:NNTF\l_tmpa_str\l_tmpb_str{
+				\bool_gset_true:N \g__auth_logged_in_bool
+				\prg_return_true:
+			}{
+				\prg_return_false:
+			}
+		}
+	}
+}
 \prg_new_conditional:Npnn \auth_if_logged_in: { TF, T, F } {
 	\cgi_get_cookie:Nn \l__auth_user_str {u}
 	\str_if_empty:NTF \l__auth_user_str {
@@ -15,23 +41,10 @@
 		\str_if_empty:NTF \l__auth_pass_str {
 			\prg_return_false:
 		} {
-			\db_print:Nnx \l_tmpa_str {select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?} {\l__auth_user_str}
-			\str_if_empty:NTF \l_tmpa_str {
-				\prg_return_false:
+			\__auth_if_logged_in:TF {
+				\prg_return_true:
 			} {
-				\regex_split:nxN {\s} {\l_tmpa_str} \l__db_iterate_col_seq
-				\str_set:Nx \l_tmpa_str {\seq_item:Nn \l__db_iterate_col_seq {1}}
-				\str_set:Nx \l_tmpb_str {\seq_item:Nn \l__db_iterate_col_seq {2}}
-				\hash_init:
-				\hash_write:x{\l__auth_pass_str}
-				\hash_write:x{\l_tmpa_str}
-				\hash_done_iterative:N \l_tmpa_str
-				\str_if_eq:NNTF\l_tmpa_str\l_tmpb_str{
-					\bool_gset_true:N \g__auth_logged_in_bool
-					\prg_return_true:
-				}{
-					\prg_return_false:
-				}
+				\prg_return_false:
 			}
 		}
 	}
@@ -43,7 +56,71 @@
 	\str_use:N \l__auth_user_str
 }
 
+\cs_new:Npn \auth_login: {
+	\cgi_get_request:Nn \l__auth_user_str {u}
+	\str_if_empty:NTF \l__auth_user_str {
+		\cgi_header:nn{Status}{400 Bad Request}
+		\cgi_body:n{Invalid~ username~ or~ password}
+		\cgiEnd
+	} {
+		\cgi_get_request:Nn \l__auth_pass_str {p}
+		\str_if_empty:NTF \l__auth_pass_str {
+			\cgi_header:nn{Status}{400 Bad Request}
+			\cgi_body:n{Invalid~ username~ or~ password}
+			\cgiEnd
+		} {
+			\__auth_if_logged_in:TF {
+				\cgi_set_cookie:nN {u} \l__auth_user_str
+				\cgi_set_cookie:nN {p} \l__auth_pass_str
+			} {
+				\cgi_header:nn{Status}{400 Bad Request}
+				\cgi_body:n{Invalid~ username~ or~ password}
+				\cgiEnd
+			}
+		}
+	}
+}
+
+\cs_new:Npn \auth_signup: {
+	\cgi_get_request:Nn \l__auth_user_str {u}
+	\str_if_empty:NTF \l__auth_user_str {
+		\cgi_header:nn{Status}{400 Bad Request}
+		\cgi_body:n{Invalid~ username~ or~ password}
+		\cgiEnd
+	}{
+		\cgi_get_request:Nn \l__auth_pass_str {p}
+		\str_if_empty:NTF \l__auth_pass_str {
+			\cgi_header:nn{Status}{400 Bad Request}
+			\cgi_body:n{Invalid~ username~ or~ password}
+			\cgiEnd
+		}{
+			\db_print:Nnx \l_tmpa_str
+			{select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?;}
+			{\l__auth_user_str}
+			\str_if_empty:NTF \l_tmpa_str {
+				\cgi_header:nn{Status}{400 Bad Request}
+				\cgi_body:n{Invalid~ username~ or~ password}
+				\cgiEnd
+			}{
+				\str_set:Nx \l_tmpa_str {\hash_salt:}
+				\hash_init:
+				\hash_write:x{\l__auth_pass_str}
+				\hash_write:x{\l_tmpa_str}
+				\hash_done_iterative:N \l_tmpb_str
+
+				\db_print:Nnxxx \l_tmpa_str
+				{insert~ into~ Users(Name,~ Salt,~ Pass)~ values (?, ?, ?);}
+				{\l__auth_user_str} {\l_tmpa_str} {\l_tmpb_str}
+				\cgi_set_cookie:nN {u} \l__auth_user_str
+				\cgi_set_cookie:nN {p} \l__auth_pass_str
+			}
+		}
+	}
+}
+
 \let \authIfLoggedIn = \auth_if_logged_in:T
 \let \authGetName = \auth_get_name:
+\let \authLogin = \auth_login:
+\let \authSignup = \auth_signup:
 
 \ExplSyntaxOff

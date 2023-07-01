@@ -1,8 +1,29 @@
 #!/usr/bin/env bash
 
+run_db() {
+	./dbd.py &
+
+	while ! nc -w 1 -U db.socket 2>/dev/null; do
+		sleep 0.1
+	done
+}
+
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 find -mindepth 1 -maxdepth 1 -name '.tmp.*' -type d -execdir rm -r '{}' +
-./dbd.py &
-python3 ./index.py 12321 --cgi &
+
+run_db
+./dbctl.py script 'select * from Users;' || {
+	kill $!
+	rm index.db
+	run_db
+	./dbctl.py script 'create table Users (
+		Name varchar(256) not null,
+		Pass char(32) not null,
+		Salt char(35) not null,
+		primary key (Name)
+	);'
+} || exit
+
+./index.py 12321 --cgi &
 xdg-open http://localhost:12321/cgi-bin/index
 wait

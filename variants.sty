@@ -5,8 +5,12 @@
 
 \cs_generate_variant:Nn \str_set:Nn {Nx}
 \cs_generate_variant:Nn \str_put_right:Nn {Nx}
+\cs_generate_variant:Nn \str_if_in:nnTF {nxTF}
 \cs_generate_variant:Nn \regex_split:nnN {nxN}
 \cs_generate_variant:Nn \regex_extract_all:nnN {nxN}
+\cs_generate_variant:Nn \prop_put:Nnn {Nxx}
+\str_new:N \l_tmpc_str
+\str_new:N \l_tmpd_str
 \let \strNew = \str_new:N
 \let \strUse = \str_use:N
 \let \strSet = \str_set:Nn

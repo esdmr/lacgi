@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 From https://stackoverflow.com/a/25810600
 """

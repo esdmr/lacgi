@@ -3,7 +3,57 @@
 
 \ExplSyntaxOn
 
-\cs_new:Npn \g_cgi_env:Nn #1 #2 {
+\cs_new:Npn \__cgi_urlencoded_unescape_x:w #1 \q_stop {
+	\int_set:Nn \l_tmpa_int {\int_from_hex:n{#1}}
+	\str_put_right:Nx \l_tmpa_str {\char_generate:nn{\l_tmpa_int}{12}}
+}
+
+\cs_new:Npn \__cgi_urlencoded_unescape_c:w #1 \q_stop {
+	\str_put_right:Nn \l_tmpa_str {#1}
+}
+
+\cs_new:Npn \__cgi_urlencoded_unescape:w {
+\peek_charcode_remove:NTF {\%} {\__cgi_urlencoded_unescape_x:w} {
+\peek_charcode_remove:NTF + {\__cgi_urlencoded_unescape_x:w 20}{\__cgi_urlencoded_unescape_c:w}
+}
+}
+
+\cs_new:Npn \__cgi_urlencoded_unescape:N #1 {
+	\str_clear:N \l_tmpa_str
+	\regex_extract_all:nxN{[^\x25+]+|\+|\x25\d{2}}{#1}\l_tmpa_seq
+	\seq_map_inline:Nn \l_tmpa_seq {
+		\str_if_in:nxTF{##1}{\c_percent_str}{
+			\exp_args:Nx\__cgi_urlencoded_unescape_x:w {\str_tail:n{##1}} \q_stop
+		}{
+			\__cgi_urlencoded_unescape:w ##1 \q_stop
+		}
+	}
+	\str_set_eq:NN #1 \l_tmpa_str
+}
+
+\ior_new:N \g_cgi_request_ior
+\ior_open:Nn \g_cgi_request_ior {\c_sys_jobname_str.cgi-request}
+\prop_new:N \g_cgi_request_prop
+
+\cs_new:Npn \cgi_process_request: {
+	\ior_str_map_inline:Nn \g_cgi_request_ior {
+		\regex_split:nnN {&}{##1} \l_tmpa_seq
+		\seq_map_inline:Nn \l_tmpa_seq {
+			\regex_split:nnN {=}{####1} \l_tmpb_seq
+			\str_set:Nx \l_tmpb_str {\seq_item:Nn \l_tmpb_seq {1}}
+			\str_set:Nx \l_tmpc_str {\seq_item:Nn \l_tmpb_seq {2}}
+			\__cgi_urlencoded_unescape:N \l_tmpb_str
+			\__cgi_urlencoded_unescape:N \l_tmpc_str
+			\prop_put:Nxx \g_cgi_request_prop {\l_tmpb_str} {\l_tmpc_str}
+		}
+	}
+}
+
+\cs_new:Npn \cgi_get_request:Nn #1 #2 {
+	\str_set:Nx #1 {\prop_item:Nn \g_cgi_request_prop {#2}}
+}
+
+\cs_new:Npn \cgi_env:Nn #1 #2 {
 	\sys_get_shell:nnN { kpsewhich ~ --var-value ~ #2 } {
 		\char_set_catcode_space:N \ %
 	} \l_tmpa_tl
@@ -50,6 +100,15 @@
 
 \cs_generate_variant:Nn \cgi_body:n {x}
 
+
+\cs_new:Npn \cgi_end: {
+	\cgi_header_write:
+	\begin{document}
+	a
+	\end{document}
+	\endinput
+}
+
 \let \cgiHeader = \cgi_header:nn
 \let \cgiHeaderX = \cgi_header:xx
 \let \cgiHeaderNX = \cgi_header:nx
@@ -57,15 +116,11 @@
 \let \cgiHeaderWrite = \cgi_header_write:
 \let \cgiBody = \cgi_body:n
 \let \cgiBodyX = \cgi_body:x
+\let \cgiProcessRequest = \cgi_process_request:
+\let \cgiGetRequest = \cgi_get_request:Nn
+\let \cgiEnd = \cgi_end:
 \cgi_header_alias:Nn \cgiContentType {Content-Type}
 \cgi_header_alias:Nn \cgiStatus {Status}
+\cgi_header_alias:Nn \cgiLocation {Location}
 
 \ExplSyntaxOff
-
-\def \cgiEnd {
-	\cgiHeaderWrite
-	\begin{document}
-	~
-	\end{document}
-	\endinput
-}

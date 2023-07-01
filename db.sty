@@ -38,7 +38,6 @@
 	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str'}
 }
 
-\str_new:N \l_tmpc_str
 \cs_new:Npn \db_print:Nnnn #1 #2 #3 #4 {
 	\str_set:Nn \l_tmpa_str {#2}
 	\db_escape:N \l_tmpa_str
@@ -49,7 +48,6 @@
 	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str' ~ '\l_tmpc_str'}
 }
 
-\str_new:N \l_tmpd_str
 \cs_new:Npn \db_print:Nnnnn #1 #2 #3 #4 #5 {
 	\str_set:Nn \l_tmpa_str {#2}
 	\db_escape:N \l_tmpa_str
@@ -57,7 +55,7 @@
 	\db_escape:N \l_tmpb_str
 	\str_set:Nn \l_tmpc_str {#4}
 	\db_escape:N \l_tmpc_str
-	\str_set:Nn \l_tmpd_str {#4}
+	\str_set:Nn \l_tmpd_str {#5}
 	\db_escape:N \l_tmpd_str
 	\db_query:Nx #1 {run ~ '\l_tmpa_str' ~ '\l_tmpb_str' ~ '\l_tmpc_str' ~ '\l_tmpd_str'}
 }
