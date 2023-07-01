@@ -61,13 +61,13 @@
 	\str_if_empty:NTF \l__auth_user_str {
 		\cgi_header:nn{Status}{400 Bad Request}
 		\cgi_body:n{Invalid~ username~ or~ password}
-		\cgiEnd
+		\cgi_end:
 	} {
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
 			\cgi_header:nn{Status}{400 Bad Request}
 			\cgi_body:n{Invalid~ username~ or~ password}
-			\cgiEnd
+			\cgi_end:
 		} {
 			\__auth_if_logged_in:TF {
 				\cgi_set_cookie:nN {u} \l__auth_user_str
@@ -75,7 +75,7 @@
 			} {
 				\cgi_header:nn{Status}{400 Bad Request}
 				\cgi_body:n{Invalid~ username~ or~ password}
-				\cgiEnd
+				\cgi_end:
 			}
 		}
 	}
@@ -86,13 +86,13 @@
 	\str_if_empty:NTF \l__auth_user_str {
 		\cgi_header:nn{Status}{400 Bad Request}
 		\cgi_body:n{Invalid~ username~ or~ password}
-		\cgiEnd
+		\cgi_end:
 	}{
 		\cgi_get_request:Nn \l__auth_pass_str {p}
 		\str_if_empty:NTF \l__auth_pass_str {
 			\cgi_header:nn{Status}{400 Bad Request}
 			\cgi_body:n{Invalid~ username~ or~ password}
-			\cgiEnd
+			\cgi_end:
 		}{
 			\db_print:Nnx \l_tmpa_str
 			{select~ Salt,~ Pass~ from~ Users~ where~ Name~ ==~ ?;}
@@ -100,7 +100,7 @@
 			\str_if_empty:NTF \l_tmpa_str {
 				\cgi_header:nn{Status}{400 Bad Request}
 				\cgi_body:n{Invalid~ username~ or~ password}
-				\cgiEnd
+				\cgi_end:
 			}{
 				\str_set:Nx \l_tmpa_str {\hash_salt:}
 				\hash_init:
